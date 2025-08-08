@@ -1,0 +1,1 @@
+SOLID pipelines: https://www.startdataengineering.com/post/design-patterns/

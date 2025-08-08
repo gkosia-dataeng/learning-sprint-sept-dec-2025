@@ -1,0 +1,2 @@
+Pyflink articles series: https://diptimanrc.medium.com/data-engineering-with-pyflink-table-api-kafka-flink-getting-started-part-2-685f75c3236c
+Pyflink jobs: https://github.com/ArkanNibrastama/carFactoryDataPipeline/tree/main/flink

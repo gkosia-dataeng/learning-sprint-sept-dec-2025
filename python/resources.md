@@ -1,0 +1,1 @@
+Python tips: https://dev.to/leowonglaw/advanced-python-tips-tricks-1km6
