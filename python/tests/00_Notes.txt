@@ -1,0 +1,54 @@
+
+resources:
+    https://realpython.com/python-testing/
+    https://realpython.com/pytest-python-testing/
+
+
+Unit test vs Integration test:
+
+    Unit test: test a single component
+        Test step: the test
+        Test assertion: check the test step result
+    Integration test: test components that will need to work together in order to achive a simple task
+
+Test runners:
+
+    unittest: build-in
+              requires test to be in classes as methods
+              use unittest.TestCase instread of 
+    nose2: 
+    pytest:
+            support of build-in assert
+            support filtering for test cases
+            have plugins to extend functionality
+
+    If file start with test_* all runners will assume that the file contains test cases
+
+Running a test:
+
+    1st way: run it as a python script, in the script call the unittest.main() to initiate the runner: python -m tests.test_unittest_SimpleProgram
+    2nd way: run the unittest runner: python -m unittest tests.test_unittest_SimpleProgram
+
+Structure of test:
+
+    1. Create the inputs: fixtures are static data used as input for the tests, i can ovveride the def setUp(self) in unittest.TestCase class to initialize the fixtures
+    2. Run the test step
+    3. Compare the output with the expected result
+
+
+
+Pytest:
+
+    Write methods start with test_* in files test_
+    Use python assert to write assertions of any type
+    Run pytest from parent folder to test
+
+    using @pytest.fixture can declare methods that return input data, then you can inject the fixtures to test methods
+
+    Pytest provide options to filter based on test name (-k), directory scope, category of test (-m) 
+
+    Using the decorator @pytest.mark.parametrize i can parameterize the input and excpected result in test function
+
+    Using context manager pytest.raises can check in specific condition if raised exception with specific error message pattern
+
+    https://betterstack.com/community/guides/testing/pytest-guide/
