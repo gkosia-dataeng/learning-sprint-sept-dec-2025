@@ -1,0 +1,22 @@
+Appliation
+    Jobs: on each action we have a separeted job
+        Stages: on each shuffle we have separeted stage
+            Tasks: each Task operate on a single partition
+
+
+Action: operation that trigger the execution of the job, actually produce a result (write the data or return something to driver)
+        collect(): return all data to driver
+        count, take, saveAsTextFile..
+
+Shuffle: data redistributed across different executors orpartitions to complete an operation, (shuffled data written to local disk sorted and indexed by key, exchanged over network, readed from target)
+         join, groupByKey, repartition, distinct
+
+
+Processes:
+    Driver: orchestrates
+            build the DAG (plan the stages and tasks)
+            Schedule and monitor (Spark UI)
+    Executores: execute, cache/storage
+                run tasks slots = cores / task CPUs ==> places of execution = how many cores / number of cores assign to each task 
+    Resource manager: allocate resources (cpu, memory), launches driver and executor processes
+    SparkContext: drivers entry point to cluster
