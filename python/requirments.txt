@@ -1,3 +1,4 @@
 tenacity
 requests
 pytest
+pandas

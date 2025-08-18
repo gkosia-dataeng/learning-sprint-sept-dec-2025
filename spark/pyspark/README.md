@@ -1,0 +1,1 @@
+### Pyspark practice code can be found at: `https://github.com/gkosia-dataeng/spark/tree/main/python_spark/spark_06_practice`
