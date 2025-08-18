@@ -66,6 +66,8 @@ logs = [
 import pandas as pd
 import json
 
+# my solution
+
 # load to df
 df_logs = pd.read_json(json.dumps(logs))
 
@@ -107,3 +109,42 @@ output = {
 
 assert expected_output == output, f"Output is not matching, got {output}, expected {expected_output}"
 
+
+
+## chatgbt solution 
+df = pd.read_json(json.dumps(logs))
+df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+# Define session timeout threshold (e.g., 30 minutes)
+SESSION_THRESHOLD = pd.Timedelta(minutes=30)
+
+# Sort by user and timestamp
+df = df.sort_values(["user_id", "timestamp"])
+
+# Compute time difference from previous event per user
+df["prev_ts"] = df.groupby("user_id")["timestamp"].shift()
+df["time_diff"] = df["timestamp"] - df["prev_ts"]
+
+# Start a new session if time difference is greater than threshold or first event
+df["new_session"] = (df["time_diff"] > SESSION_THRESHOLD) | df["time_diff"].isna()
+
+# Assign session IDs per user
+df["session_id"] = df.groupby("user_id")["new_session"].cumsum().astype(str)
+
+
+# Build session-level records
+session_json = {}
+for user, group in df.groupby("user_id"):
+    sessions = []
+    for sid, session_group in group.groupby("session_id"):
+        sessions.append({
+            "session_id": sid,
+            "start_time": session_group["timestamp"].min().isoformat(),
+            "end_time": session_group["timestamp"].max().isoformat(),
+            "events": session_group["event"].tolist()
+        })
+    session_json[user] = sessions
+
+# Convert to JSON string (optional pretty print)
+json_str = json.dumps(session_json, indent=2)
+print(json_str)
