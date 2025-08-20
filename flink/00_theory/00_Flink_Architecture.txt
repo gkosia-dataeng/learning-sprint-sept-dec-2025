@@ -1,0 +1,79 @@
+https://softwarefrontier.substack.com/p/understanding-apache-flink-architecture
+
+Client: submit a job to Dispatcher
+    Dispatcher: provide rest api to accept job submission
+                runs the UI dashboard 
+        
+        JobManager: handles the schedule and distribution of the tasks to TaskManagers
+                    manage state and operations like checkpoint and recovery
+
+            Resource Manager: interact with external resources (yarn, k8s, standalone cluster)    
+                              managing the slots of the TaskManagers and resource allocation
+            
+                TaskManager: worker of the cluster
+                            provide slots (execution units, number of tasks = number of available slots)
+                            
+                            executing the tasks assign by JobManager
+                            managing state during execution
+                            report task status and metrics to the JobManager
+            
+            JobGraph: the logical execution plan (nodes (operators), edges (data flow))
+                      JobManager will convert the JobGraph to the physical plan considering parallelism and resources
+            Checkpoint coordinator: checkpointn process
+            Savepoint: user-triggered consistend snapshot
+            State backend: state store
+            Task slots: each TaskManager has limited number of slots.
+                        each task executed in one slot
+                        the number of parallelism determined by the nmber of slots
+            Flink client: cli or rest api to submit a job             
+
+Typical flow:
+    The client submiting a job to Dispatcher
+    Dispatcher receive the job and send it to JobManager
+    JobManager will convert the JobGraph to ExecutionGraph and request TaskManager slots from ResourceManager
+    ResourceManager will communicate with external reosurces provider to allocate resrources
+    JobManager will assign tasks to TaskManagers
+
+
+Parralelism:
+
+    The parallelism of each operator can be set individually
+    Each non-source/sink operator having a parallelism level
+
+    Example: 
+        One job has 4 operators (exclude source/sink) 
+        Each operator has 4 level of parallelism (subtasks per operator)
+        ==> The job will have 16 tasks
+
+
+Operations: 
+
+    Ingest/Egress: read/write data
+    Trnsform: process data (map, filter, flatMap, keyBy)
+    Rolling Aggregations: cummulative calculations (min, max, count)
+    Window Operations: 
+        Fixed(Tumbling): every 10 mins
+        Sliding window: window of 15 mins moved by 3 mins (windows overlapping)
+        Sssion: grous are based on inactivity gaps (if no message for 6  mins is a new session)
+
+Time semantics:
+
+    Event Time: when the event created in the source
+    Processing Time: when the event observed by the system
+    Watermark: special tiype of event that marks the progress of the stream
+
+State:
+
+    Types of state:
+        Operator state: state of single operator, all events processed by the same parralell instance of the task can be accessed
+                        tasks from different operator instance cannot access the state
+
+        Keyed state: Flink partition the stream on a key and ensure that all events of the key processed by the same operator
+
+Checkpointing:
+
+    JobManager initiates a checkpoint and sends a checkpoint barrier to the source operators
+    Source operators stop emitting new events and checkpoint their local state to the state backend
+    Once done, they broadcast the checkpoint barrier to all downstream tasks
+    The sink task is the last task in the chain to receive all the barriers, checkpoint its state, and send an acknowledgment to the JobManager
+    The JobManager considers the checkpoint successful
