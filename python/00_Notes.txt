@@ -1,3 +1,26 @@
 Iterator vs Iterable:
     Iterable is an object that we can iterate on (implement the __iter__()): list, tuple, dict
     Iterator is an object that produce values one at a time (implement both the __iter__() and __next__())
+
+
+Complexity per data structure, per operation
+
+    List:
+        lst[i]: access by index O(1)
+        lst.insert(i, x): insert to specific location O(n)
+        del lst[i], lst.remove(x), x in lst O(n)
+        lst.sort(): O(n*log n)
+
+    Tuple:
+        tup[x]: access by index O(1)
+        x in tup: O(n)
+        sorted(tup) → O(n log n): not in-place, return a list
+
+    Set: 
+        s.add(x): O(1)
+        s.remove(x): O(1), raise error if not found
+        s.discard(x): O(1), raise error if not found
+        x in s: O(1)
+        s.pop(): O(1) random removal
+        s.clear(): reset the set O(1)
+        
