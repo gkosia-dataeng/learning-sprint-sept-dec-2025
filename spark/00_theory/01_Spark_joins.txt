@@ -1,0 +1,69 @@
+https://medium.com/@satadru1998/a-peek-into-internals-of-spark-join-strategy-03776af99c01
+
+
+    Join algorithms:
+    Nested join:  
+        
+        For each row of the outer table search the row in the inner table
+        O(M*N)
+
+    Merger join:
+
+        Both tables are sorted by join key (if not they are sorted internally)
+        Start from both sides
+        If key is the same, output row
+        If outer key > inner key move forward the inner index otherwise the opposite
+
+        O(Nlog(N) + Mlog(M))  for sorting
+        O(M+N)                for joining
+
+        even if the tables spill to disk(not feed in-memory), the join can still stream both datasets
+
+        range joins are most efficient on merge join
+
+    Hash Join:
+
+        M 1---* N
+        N table mis scanned and created as hasg table based oon join key (many side of relation)
+        Then M table is scanned and each row is checked against the hash table
+        Hash table should be stored in-Memory, so the smaller tables is choosen as hash table
+
+        *** hash tabel must feed in-memorym once it spills to disk, the performance degrades drastically
+        equity joins are most efficient on hash join
+
+        O(M+N)
+
+
+In context of Spark:
+
+    The data are partitioned so corelated rows might exists in different executor
+    On join spark perform Shuffle (redistribute the data based on key which becomes the partition key)
+
+
+
+    ****  Tips for performance
+    
+    1. Only include the columns that you need (less data volume to shuffle)
+    2. When join key has low cardinality means many records goes to the same partitions (data skew) 
+         use a key with more variety (higher cardinality) or a combination of keys(composite key) if possible
+
+    In spark we dont have Nested loop join
+    We have Shuffle Hash Join and Shuffle Sort Merge Join
+
+    Those algorithms are used when both of the tables are very large and is not posible to broadcast one of them
+
+
+    Default algorithm if not posible to broadcast is Shuffle Sort Merge Join
+        Perform well in both equi and not equi joins
+        Can spill to disk for sorting, not requiring data to feed in-memory
+
+
+Set off merge join as predefined: 
+    spark.conf.set("spark.sql.join.preferSortMergeJoin", "false") 
+
+Disable broadcast:
+    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
+
+Broadcast Join = driver-based broadcast of a small dataset without any shuffle
+Cross Join = shuffle-driven replication of all partitions across executors
