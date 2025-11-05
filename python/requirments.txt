@@ -2,3 +2,4 @@ tenacity
 requests
 pytest
 pandas
+typer
