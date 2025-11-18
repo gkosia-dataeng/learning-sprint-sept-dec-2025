@@ -1,0 +1,60 @@
+Actions: write, show, count, collect, save, take
+Wide transformations: groupBy, join, sortBy, distinct
+Each actions is at least one Job
+In a job, each wide trasformation is a stage (need shuffle)
+Each partition is processes by a task
+
+
+Example:
+
+    rdd = sc.textFile("s3://bucket/events/")      # Job 1 (file read)
+
+    # Transformations (lazy)
+    mapped = rdd.map(lambda x: (x.split(",")[0], 1))
+    reduced = mapped.reduceByKey(lambda a, b: a + b)
+    filtered = reduced.filter(lambda x: x[1] > 10)
+
+    # --- ACTION 2 ---
+    result = filtered.collect()                   # Job 2 (map + shuffle + filter)
+
+    # --- ACTION 3 ---
+    df = spark.read.csv("s3://bucket/users/")     # Job 3 (file read)
+
+    # Create DataFrame from the RDD result
+    result_df = spark.createDataFrame(result, ["id", "count"])
+
+    # Join (lazy)
+    joined = df.join(result_df, "id")
+
+    # --- ACTION 4 ---
+    final_count = joined.count()                  # Job 4 (join + shuffle)
+    print(final_count)
+
+
+    
+    sc.textFile:
+        1 job to inspect the file
+        1 stage 
+        If the file is 200 partitions we have 200 tasks
+        
+    
+    collect(): force spark to run all prev lazy transformations
+        1 job: 
+        3 stages:
+            stage 1: map 
+            stage 2: shuffle reduce
+            stage 3: filter
+        3 x 200 tasks -> 600 tasks
+
+    read.csv:
+        1 job
+        1 stage
+        100 partitions (assuming csv is 100 partitions)
+
+    joined.count:
+        1 job
+
+        Read csv agai         # read.csv
+        shuffle for the join  # df.join(result_df
+        joined.count          # joined.count
+

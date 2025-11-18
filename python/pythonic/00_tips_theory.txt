@@ -1,0 +1,8 @@
+1. If the class does not have any attributes and we dont need to have multiple instances then create just the functions in a file 
+2. File opening, closing with Context manager with open('file','r') as f:
+3. Use type annotations
+4.  Istread of check if file exists, try to open it and throw a FileNotFoundError (try: except FileNotFoundError:)
+5. Use @dataclass to model related data
+   Use filed() to creade attributes of @dataclass with default values(from dataclass import dataclass, field)
+6. Centralize constants on top of python file (convert to constans of config variables parameters of the logic)
+7. List of objects can converted to Iterator[Object]

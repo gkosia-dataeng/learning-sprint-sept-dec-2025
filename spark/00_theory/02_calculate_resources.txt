@@ -1,0 +1,44 @@
+Data size: 500GB
+
+Node size:
+    16 vcpus, 64GB memory
+
+
+1. Number of partitions:
+    1. HDFS block size = 128 MB
+    2. Best practice: target Partition size 128MB
+    3. So Num of partitions = File size / Partition size ==> 500GB / 128MB = 4000 partitions
+
+2. Executor cores: 
+    1. Best practice: 5 cores
+
+3. Number of executors:
+    total tasks: total partitions => 4000
+    Number of executors = total tasks / cores per executor => 4000 / 5 = 400
+
+    But the cluster cannot spinup 400 executors (only 16 cores per node)
+
+    If i have 10 nodes ==> each node 16 / 5 --> can run 3 executors
+
+4. Memory of executor:
+
+    Node memory = 64 GB
+    executors / node = 3
+    64 / 3 = 21 GB oer executor - 15% OVERHEAD (3GB) = 18GB per executor
+
+    OR 
+
+    Best practice: fro each core * partition size: 4* 128MB = 512MB minimum per core 
+5. So with 30 executors (10 nodes x 3 executors) x 5 tasks parralelism = 150 slots
+   4000 / 150 slots = 26 waves to process all partitions
+
+
+6. Spark job configuration:
+
+    --conf spark.sql.shuffle.partitions=4000
+    --conf spark.default.parallelism=4000
+    --num-executors 30
+    --executor-cores 5
+    --executor-memory 18G
+    --conf spark.executor.memoryOverhead=3G
+    --driver-memory 4G

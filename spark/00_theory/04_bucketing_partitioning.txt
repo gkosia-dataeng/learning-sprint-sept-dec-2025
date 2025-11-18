@@ -1,0 +1,12 @@
+Partitioning: when filtering by the partition column
+
+    Best column: low cardinality (date, country..)
+    Goal: Partition pruning: based on filters
+
+
+Bucketing: hashing the value of a column and distributing the rows to fixec number of files
+        bucketBy(32, "user_id"): distributing the users to 32 files 
+                                 colocation of rows of the same value
+    
+    Best column: hight cardinality (customer id)
+    Goal: optimize joins, reduce shuffle
